@@ -70,15 +70,13 @@ app.use(cors({
   credentials: true,
 }));
 
-const healthHandler = async (_req: express.Request, res: express.Response) => {
+const healthHandler = (_req: express.Request, res: express.Response) => {
   try {
     getDb().prepare('SELECT 1').get();
-    const localLlmLoaded = await localLlm.load();
     res.json({
-      status: localLlmLoaded ? 'ok' : 'degraded', database: 'sqlite',
-      modelSource: 'LOCAL_PROJECT', localLlmLoaded,
-      generationMode: localLlmLoaded ? 'LOCAL_LLM' : 'UNAVAILABLE',
-      remoteModelDownload: false, networkRequired: false,
+      status: 'ok',
+      service: 'Narayana NEXA Backend',
+      database: 'connected',
       localLlm: localLlm.status(),
     });
   } catch (err: any) {
