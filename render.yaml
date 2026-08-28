@@ -1,0 +1,30 @@
+# Render Blueprint — deploy the backend service
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: necn-nexa-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: DATABASE_PATH
+        value: /data/necn.db
+      - key: CORS_ORIGIN
+        sync: false
+    disk:
+      name: sqlite-data
+      mountPath: /data
+      sizeGB: 1

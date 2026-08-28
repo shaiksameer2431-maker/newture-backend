@@ -1,0 +1,22 @@
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+*.log
+coverage/
+tmp/
+temp/
+tmp-*/
+
+# Temporary build & audit artifacts
+artifacts/backups/
+artifacts/forensic-html/
+artifacts/logs/
+data/backups/
+data/*.db-shm
+data/*.db-wal
+
+# Uploaded files
+uploads/*
+!uploads/.gitkeep

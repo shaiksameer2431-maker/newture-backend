@@ -1,0 +1,32 @@
+# NEXA Backend Environment Variables
+
+# Server Configuration
+PORT=3000
+NODE_ENV=development
+
+# Local RAG & Local AI (bundled ONNX, no cloud API keys required)
+DATABASE_PATH=backend/data/necn.db
+NECN_CRAWL_URL=https://necn.ac.in/
+HTTP_CONNECT_TIMEOUT=20000
+HTTP_READ_TIMEOUT=30000
+HTTP_TOTAL_TIMEOUT=60000
+HTTP_MAX_RETRIES=3
+HTTP_RETRY_BACKOFF=800
+# curl-based crawler transport honors HTTPS_PROXY, HTTP_PROXY and NO_PROXY.
+# Leave unset when the deployment has direct outbound HTTPS access.
+# HTTPS_PROXY=http://proxy.example:8080
+# NO_PROXY=localhost,127.0.0.1
+LLM_PROVIDER=local
+LLM_MODEL=LaMini-Flan-T5-77M
+EMBEDDING_PROVIDER=local
+EMBEDDING_MODEL=Xenova/all-MiniLM-L6-v2
+
+# Secret key for encryption (optional - used to encrypt Gmail App Password in database)
+# Generate a random string for this: https://generate-random.org/encryption-key-generator
+NEXA_SECRET_KEY=your-secret-key-here
+
+# Gmail Configuration
+# IMPORTANT: Gmail credentials are now configured through the Notification Settings UI
+# NOT through environment variables. The .env file only needs the encryption key.
+# The admin will enter Gmail Email and Gmail App Password in the admin panel.
+# Generate App Password at: https://myaccount.google.com/apppasswords

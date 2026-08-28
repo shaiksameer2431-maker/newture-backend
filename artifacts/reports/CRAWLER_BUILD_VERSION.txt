@@ -1,0 +1,3 @@
+NECN NEXA Website Crawler - Transport Fix v4.0
+Native Node fetch + system curl fallback
+HTML/PDF crawling + sitemap/site-map discovery + SQLite indexing
