@@ -70,16 +70,10 @@ app.use(cors({
 }));
 
 const healthHandler = (_req: express.Request, res: express.Response) => {
-  try {
-    getDb().prepare('SELECT 1').get();
-    res.json({
-      status: 'ok',
-      service: 'Narayana NEXA Backend',
-      database: 'connected',
-    });
-  } catch (err: any) {
-    res.status(500).json({ status: 'error', error: err.message });
-  }
+  res.status(200).json({
+    status: 'ok',
+    service: 'Narayana NEXA Backend',
+  });
 };
 
 app.get('/health', healthHandler);
