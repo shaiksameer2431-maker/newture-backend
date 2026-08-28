@@ -15,7 +15,6 @@ import { parallelMultiSourceSearch, findBestStrictAnswer } from "./services/know
 import { crawlWebsite, crawlerRuntime, recoverStaleCrawlJobs, syncJobMetricsFromUrls } from "./services/websiteCrawler.js";
 import { backfillWebsiteEmbeddings } from "./services/websiteSearch.js";
 import { semanticRagStatus } from "./services/semanticRag.js";
-import { localLlm } from "./services/localLlm.js";
 import { probeExternalSource } from "./services/externalHealth.js";
 import { sendTicketCreatedEmails, sendTicketUpdateEmail, encryptSecret } from "./services/emailService.js";
 import { getCorsOrigin } from "./config/index.js";
@@ -77,7 +76,6 @@ const healthHandler = (_req: express.Request, res: express.Response) => {
       status: 'ok',
       service: 'Narayana NEXA Backend',
       database: 'connected',
-      localLlm: localLlm.status(),
     });
   } catch (err: any) {
     res.status(500).json({ status: 'error', error: err.message });
