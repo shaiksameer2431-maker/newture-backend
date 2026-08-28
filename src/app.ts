@@ -88,33 +88,137 @@ app.get('/health', healthHandler);
 app.get('/api/health', healthHandler);
 
 function getAdminConsoleUrl() {
-  const configuredFrontendUrl = process.env.FRONTEND_URL || process.env.VITE_FRONTEND_URL;
-  const frontendBase = configuredFrontendUrl || 'http://localhost:5173';
-  return new URL('/?admin=true', frontendBase).toString();
+  const configuredFrontendUrl = process.env.FRONTEND_URL || process.env.VITE_FRONTEND_URL || 'https://newture-frontend.onrender.com';
+  return new URL('/?admin=true', configuredFrontendUrl).toString();
 }
 
 function respondWithAdminConsole(req: express.Request, res: express.Response) {
   const target = getAdminConsoleUrl();
+  const frontendBase = process.env.FRONTEND_URL || process.env.VITE_FRONTEND_URL || 'https://newture-frontend.onrender.com';
 
   if (req.headers.accept && req.headers.accept.includes('text/html')) {
     return res.type('html').send(`<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="refresh" content="0; url=${target}" />
-    <title>Admin Console</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="refresh" content="2; url=${target}" />
+    <title>NEXA Backend & Admin Control</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(circle at top, #0f172a 0%, #020617 100%);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        box-sizing: border-box;
+      }
+      .card {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 40px;
+        max-width: 480px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(34, 197, 94, 0.15);
+        color: #4ade80;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 20px;
+      }
+      .pulse {
+        width: 8px;
+        height: 8px;
+        background: #22c55e;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #22c55e;
+      }
+      h1 {
+        font-size: 24px;
+        font-weight: 800;
+        margin: 0 0 10px;
+        letter-spacing: -0.5px;
+      }
+      p {
+        color: #94a3b8;
+        font-size: 14px;
+        line-height: 1.6;
+        margin: 0 0 28px;
+      }
+      .btn {
+        display: block;
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+        color: #ffffff;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 15px;
+        border-radius: 14px;
+        box-sizing: border-box;
+        transition: transform 0.15s, box-shadow 0.15s;
+        box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+        margin-bottom: 12px;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.5);
+      }
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #cbd5e1;
+        box-shadow: none;
+      }
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+      }
+      .footer {
+        margin-top: 24px;
+        font-size: 12px;
+        color: #64748b;
+      }
+    </style>
   </head>
-  <body style="font-family: Arial, sans-serif; padding: 24px;">
-    <h2>Opening admin console...</h2>
-    <p>If it does not open automatically, use this link:</p>
-    <p><a href="${target}">${target}</a></p>
+  <body>
+    <div class="card">
+      <div class="badge">
+        <span class="pulse"></span>
+        API & Database Connected
+      </div>
+      <h1>NEXA Backend Gateway</h1>
+      <p>The backend API server and pre-crawled database are active. Redirecting you to the Admin Console...</p>
+      <a href="${target}" class="btn">🚀 Open Admin Console</a>
+      <a href="${frontendBase}" class="btn btn-secondary">🎓 Open Student Portal</a>
+      <div class="footer">
+        Redirecting automatically in 2s...
+      </div>
+    </div>
   </body>
 </html>`);
   }
 
   res.json({
-    message: 'Open the admin console in your browser at the frontend address below.',
-    frontendAdminUrl: target,
+    status: 'online',
+    service: 'Narayana NEXA Backend',
+    database: 'SQLite',
+    adminConsoleUrl: target,
   });
 }
 
@@ -124,14 +228,15 @@ app.get(['/', '/admin', '/admin-console'], (req, res) => {
   if (distDir && fs.existsSync(path.join(distDir, 'index.html'))) {
     return res.sendFile(path.join(distDir, 'index.html'));
   }
-  if (req.path === '/' && (process.env.NODE_ENV || '').toLowerCase() === 'production') {
-    return res.json({
-      status: 'online',
-      service: 'Narayana NEXA Backend',
-      database: 'SQLite'
-    });
+  if (req.headers.accept && req.headers.accept.includes('text/html')) {
+    return respondWithAdminConsole(req, res);
   }
-  respondWithAdminConsole(req, res);
+  return res.json({
+    status: 'online',
+    service: 'Narayana NEXA Backend',
+    database: 'SQLite',
+    adminConsoleUrl: getAdminConsoleUrl(),
+  });
 });
 
 app.get('/health', (_req, res) => {
