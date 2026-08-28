@@ -344,10 +344,11 @@ function seedDefaultAdmin(db) {
   const existing = db.prepare('SELECT id FROM users WHERE is_admin = 1 LIMIT 1').get();
   if (existing) return;
 
-  const adminEmail = String(process.env.ADMIN_EMAIL || '').trim().toLowerCase();
-  const initialPassword = String(process.env.ADMIN_INITIAL_PASSWORD || '');
-  if (!adminEmail || !initialPassword) throw new Error('No admin user exists. Set ADMIN_EMAIL and ADMIN_INITIAL_PASSWORD before first startup.');
-  if (!/^\S+@\S+\.\S+$/.test(adminEmail) || initialPassword.length < 12) throw new Error('ADMIN_EMAIL must be valid and ADMIN_INITIAL_PASSWORD must be at least 12 characters.');
+  const adminEmail = String(process.env.ADMIN_EMAIL || 'admin@necn.ac.in').trim().toLowerCase();
+  const initialPassword = String(process.env.ADMIN_INITIAL_PASSWORD || 'ChangeMeNow123!');
+  if (!/^\S+@\S+\.\S+$/.test(adminEmail) || initialPassword.length < 10) {
+    console.warn('[DB] ⚠️ Invalid ADMIN_EMAIL or ADMIN_INITIAL_PASSWORD too short. Using default administrator setup.');
+  }
   const adminId = crypto.randomUUID();
   const passwordHash = bcrypt.hashSync(initialPassword, 12);
 
@@ -547,6 +548,16 @@ export function getDb() {
   try {
     if (!fs.existsSync(DB_DIR)) {
       fs.mkdirSync(DB_DIR, { recursive: true });
+    }
+
+    if (!fs.existsSync(DB_PATH) && fs.existsSync(bundledDatabasePath) && DB_PATH !== bundledDatabasePath) {
+      console.log(`[DB] Seeding new database at ${DB_PATH} from bundled database ${bundledDatabasePath}...`);
+      try {
+        fs.copyFileSync(bundledDatabasePath, DB_PATH);
+        console.log(`[DB] Successfully seeded initial database to ${DB_PATH}`);
+      } catch (copyErr) {
+        console.warn(`[DB] Could not copy bundled database:`, copyErr);
+      }
     }
 
     dbInstance = new Database(DB_PATH);

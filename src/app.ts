@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import crypto from "crypto";
 import path from "path";
@@ -17,6 +18,7 @@ import { semanticRagStatus } from "./services/semanticRag.js";
 import { localLlm } from "./services/localLlm.js";
 import { probeExternalSource } from "./services/externalHealth.js";
 import { sendTicketCreatedEmails, sendTicketUpdateEmail, encryptSecret } from "./services/emailService.js";
+import { getCorsOrigin } from "./config/index.js";
 
 
 let lastSuccessfulHardResetAt = 0;
@@ -64,7 +66,7 @@ if (frontendDistDir) {
 }
 
 app.use(cors({
-  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map((s: string) => s.trim()) : true,
+  origin: getCorsOrigin(),
   credentials: true,
 }));
 
