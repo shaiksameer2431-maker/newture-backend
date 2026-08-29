@@ -231,10 +231,6 @@ app.get(['/', '/admin', '/admin-console'], (req, res) => {
   });
 });
 
-app.get('/health', (_req, res) => {
-  return res.json({ status: 'healthy' });
-});
-
 app.get('/health/database', (_req, res) => {
   try {
     getDb().prepare('SELECT 1').get();
