@@ -11,7 +11,7 @@ if (!process.env.JWT_SECRET) {
   }
 }
 export function getPort(): number {
-  return Number(process.env.PORT) || 3000;
+  return Number(process.env.PORT) || 10000;
 }
 
 export function getJwtSecret(): string {

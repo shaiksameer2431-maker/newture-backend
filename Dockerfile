@@ -22,9 +22,8 @@ COPY . .
 # Build TypeScript code to dist/server.cjs
 RUN npm run build
 
-EXPOSE 3000
+EXPOSE 10000
 
 ENV NODE_ENV=production
-ENV PORT=3000
 
 CMD ["npm", "start"]
