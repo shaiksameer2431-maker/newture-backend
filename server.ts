@@ -54,7 +54,8 @@ async function validateEmailConfiguration() {
 // Run email validation on startup (fire and forget to not block server start)
 validateEmailConfiguration().catch(err => console.error('[EMAIL] Startup validation error:', err));
 
-const DEFAULT_PORT = Number(process.env.PORT) || 3000;
+// Render supplies PORT at runtime. Keep a safe local fallback only when it is absent.
+const PORT = Number(process.env.PORT) || 10000;
 
 function printStartupReport(port: number) {
   try {
@@ -74,34 +75,29 @@ function printStartupReport(port: number) {
   }
 }
 
-function startServer(port: number, attempt = 1) {
-  process.env.PORT = String(port);
-
-  const server = app.listen(port, "0.0.0.0", () => {
+function startServer() {
+  const server = app.listen(PORT, "0.0.0.0", () => {
     const staleJobsRecovered = recoverStaleCrawlJobs();
     console.log(`[NECN CRAWLER RUNTIME] version=${crawlerRuntime().crawlerVersion} database=${getDbPath()} persistentQueue=true activeWorkers=0 staleJobsRecovered=${staleJobsRecovered}`);
     if (staleJobsRecovered > 0) {
       console.log(`[STALE JOB RECOVERY] ${staleJobsRecovered} stale job(s) recovered to interrupted status`);
     }
-    const distDir = getFrontendDistDir ? getFrontendDistDir() : null;
-    const frontendAdminUrl = distDir
-      ? `http://localhost:${port}/?admin=true`
-      : (process.env.FRONTEND_URL || 'http://localhost:5173/?admin=true');
-    console.log(`API server running on http://0.0.0.0:${port}`);
-    console.log(`Open the app & admin console at: ${frontendAdminUrl}`);
-    console.log(`Backend root URL: http://localhost:${port}`);
+    const isProd = (process.env.NODE_ENV || '').toLowerCase() === 'production';
+    const backendUrl = isProd ? 'https://newture-backend.onrender.com' : `http://localhost:${PORT}`;
+    const frontendAdminUrl = process.env.FRONTEND_URL
+      ? `${process.env.FRONTEND_URL}/?admin=true`
+      : (isProd ? 'https://newture-frontend.onrender.com/?admin=true' : `http://localhost:5173/?admin=true`);
+    console.log(`API server running on http://0.0.0.0:${PORT}`);
+    console.log(`Backend URL: ${backendUrl}`);
+    console.log(`Frontend & Admin Console: ${frontendAdminUrl}`);
     startWebsiteSyncScheduler();
-    printStartupReport(port);
+    printStartupReport(PORT);
   });
 
-  server.on("error", (error: NodeJS.ErrnoException) => {
-    if ((error as any).code === "EADDRINUSE" && attempt < 10) {
-      const fallbackPort = port + 1;
-      console.warn(`Port ${port} is already in use. Trying ${fallbackPort}...`);
-      try { server.close(() => startServer(fallbackPort, attempt + 1)); } catch (e) { startServer(fallbackPort, attempt + 1); }
-      return;
-    }
+  server.keepAliveTimeout = 120000;
+  server.headersTimeout = 120000;
 
+  server.on("error", (error: NodeJS.ErrnoException) => {
     console.error("Failed to start backend server:", error);
     // Do not crash silently; allow process manager to restart if needed
     process.exit(1);
@@ -142,4 +138,4 @@ process.on('unhandledRejection', (reason, promise) => {
   // Keep process running but log clearly; if this becomes noisy consider exiting
 });
 
-startServer(DEFAULT_PORT);
+startServer();
